@@ -1,0 +1,474 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./components.css" layer(components);
+
+/* ============================================================================
+   CASCADE ORDER — read this before adding a rule anywhere.
+
+     @layer base        element resets. Lowest priority.
+     @layer components  every named class in this project (.t-band, .plate, …)
+     Tailwind utilities beat @layer components, which is the point: a component
+     class sets the default and `max-w-[30ch]` or `lg:hidden` at the call site
+     overrides it without an !important or a specificity war.
+     unlayered          focus rings and reduced motion. Beat everything.
+
+   Putting a component class outside a layer is the bug that makes `lg:hidden`
+   silently stop working. Don't.
+   ========================================================================= */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* The header is sticky, so an in-page jump or a keyboard focus that
+       scrolls would otherwise land the target underneath it. */
+    scroll-padding-block-start: 6rem;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-shir);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    font-weight: 400;
+    /* Persian is a connected script. Letter-spacing severs the joins, so the
+       baseline is always zero and nothing in this project opts out — there is
+       no tracked Latin micro-label layer here, unlike the editorial family. */
+    letter-spacing: 0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* A rotated plate is geometrically wider than its box. The bands that
+       hold rotated content are padded to fit theirs (see `.band--tilted`),
+       and this is the backstop for a viewport nobody measured. */
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-zafaran) 55%, transparent);
+    color: var(--color-ink);
+  }
+
+  img,
+  svg,
+  video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  figure,
+  blockquote,
+  ul,
+  ol,
+  dl,
+  dd,
+  dt {
+    margin: 0;
+    padding: 0;
+  }
+
+  ul,
+  ol {
+    list-style: none;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  /* ---- Typography -------------------------------------------------------
+     Two display faces and one body face. The rule that keeps them from
+     turning into noise: Lalezar and Rakkas never appear in the same line.
+     One is the voice of the thing being named, the other is the voice
+     shouting about it. */
+
+  .t-brand,
+  .t-band,
+  .t-name {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0; /* never track Persian */
+    line-height: var(--leading-display);
+    color: var(--on-plate, var(--color-ink));
+  }
+
+  .t-brand {
+    font-size: var(--text-brand);
+  }
+
+  .t-band {
+    font-size: var(--text-band);
+    text-wrap: balance;
+  }
+
+  .t-name {
+    font-size: var(--text-name);
+    line-height: var(--leading-heading);
+  }
+
+  /* The second display voice. Rakkas is wider and rounder than Lalezar; it
+     is used where the page is shouting a short phrase rather than naming
+     something — badges, pull-quotes, group headers. */
+  .t-badge,
+  .t-quote,
+  .t-group {
+    font-family: var(--font-display-alt);
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--on-plate, var(--color-ink));
+  }
+
+  .t-badge {
+    font-size: var(--text-badge);
+    line-height: 1.35;
+  }
+
+  .t-quote {
+    font-size: var(--text-quote);
+    line-height: var(--leading-heading);
+    text-wrap: balance;
+  }
+
+  .t-group {
+    font-size: var(--text-band);
+    line-height: var(--leading-display);
+  }
+
+  .t-lead {
+    font-size: var(--text-lead);
+    line-height: 1.75;
+    color: var(--on-plate-2, var(--color-ink-2));
+    max-width: var(--measure);
+    text-wrap: pretty;
+  }
+
+  .t-body {
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    color: var(--on-plate-2, var(--color-ink-2));
+    max-width: var(--measure);
+    text-wrap: pretty;
+  }
+
+  .t-meta {
+    font-size: var(--text-meta);
+    line-height: var(--leading-tight);
+    color: var(--on-plate-3, var(--color-ink-3));
+  }
+
+  /* ---- Layout ----------------------------------------------------------- */
+
+  .container {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* A band whose content is rotated needs room for the rotation. A plate at
+     ±3° is wider than its own box — for a 420px-tall tile that is about 11px
+     past each edge — and the §13 pass measures every rotated element's
+     bounding box against the viewport, so this is fit, not fudge. */
+  .band--tilted {
+    padding-inline: max(var(--gutter), 1.75rem);
+  }
+
+  /* ---- Plates -----------------------------------------------------------
+     A plate is a solid field of one hue. It is the ONLY thing body text is
+     ever set on: pattern never sits directly behind reading text.
+
+     Each variant carries the three text tokens for its own side of the
+     palette. The hue plates deliberately resolve all three to the same full
+     strength — see the measurement note in tokens.css. */
+
+  .plate {
+    --plate-bg: var(--color-shir);
+    --on-plate: var(--color-ink);
+    --on-plate-2: var(--color-ink-2);
+    --on-plate-3: var(--color-ink-3);
+    position: relative;
+    background-color: var(--color-shir);
+    border-radius: var(--radius-sm);
+  }
+
+  /* A panel of whatever colour the band around it already is.
+     Deliberately NOT `.plate` plus a modifier: the base class re-declares
+     `--plate-bg`, so a nested plate carrying it would reset itself to cream
+     and stop matching its band. This one only reads the inherited value.
+
+     Its job is the rule in §9 of the brief — pattern never sits directly
+     behind body text. A band's pattern paints above the band's own background
+     and below its content, so a paragraph sitting straight on the band has
+     pattern strokes running through it. Wrapping it in one of these puts an
+     opaque patch of the band's own colour between the two, which is why the
+     measured plate ratio is the ratio that applies. */
+  .plate-own {
+    position: relative;
+    background-color: var(--plate-bg, var(--color-shir));
+    border-radius: var(--radius-sm);
+  }
+
+  /* The same mechanism for a short run of text rather than a panel: a
+     breadcrumb, a transliteration, a derived count. These sit on the band
+     rather than in a block, and without a patch of the band's own colour
+     under them the pattern strokes run straight through — measured at 6.13:1
+     against a 7:1 floor, which is precisely the failure that is invisible to
+     an eye and obvious to a number.
+
+     Deliberately not `.plate-own` plus a utility: the display is set at the
+     call site, because one of these is a flex row and the next is an inline
+     span, and a class that decided that for them would be wrong half the
+     time. */
+  .on-band {
+    position: relative;
+    background-color: var(--plate-bg, var(--color-shir));
+    border-radius: var(--radius-sm);
+    padding-inline: var(--space-2);
+  }
+
+  .plate--shir {
+    background-color: var(--color-shir);
+    --plate-bg: var(--color-shir);
+  }
+
+  .plate--shir-deep {
+    background-color: var(--color-shir-deep);
+    --plate-bg: var(--color-shir-deep);
+  }
+
+  /* Ink plates: 8.81:1 and 7.65:1 measured. Full ink on every line. */
+  .plate--zafaran {
+    background-color: var(--color-zafaran);
+    --plate-bg: var(--color-zafaran);
+    --on-plate: var(--color-ink);
+    --on-plate-2: var(--color-ink);
+    --on-plate-3: var(--color-ink);
+  }
+
+  .plate--golab {
+    background-color: var(--color-golab);
+    --plate-bg: var(--color-golab);
+    --on-plate: var(--color-ink);
+    --on-plate-2: var(--color-ink);
+    --on-plate-3: var(--color-ink);
+  }
+
+  /* Reversed plates: cream at 4.64:1, 5.29:1 and 9.45:1 measured. */
+  .plate--anar {
+    background-color: var(--color-anar);
+    --plate-bg: var(--color-anar);
+    --on-plate: var(--color-shir);
+    --on-plate-2: var(--color-shir);
+    --on-plate-3: var(--color-shir);
+  }
+
+  .plate--pesteh {
+    background-color: var(--color-pesteh);
+    --plate-bg: var(--color-pesteh);
+    --on-plate: var(--color-shir);
+    --on-plate-2: var(--color-shir);
+    --on-plate-3: var(--color-shir);
+  }
+
+  .plate--lajvard {
+    background-color: var(--color-lajvard);
+    --plate-bg: var(--color-lajvard);
+    --on-plate: var(--color-shir);
+    --on-plate-2: var(--color-shir);
+    --on-plate-3: var(--color-shir);
+  }
+
+  /* The ink plate — used by the ORDER band, where the densest block has to
+     out-weigh five hues around it. */
+  .plate--ink {
+    background-color: var(--color-ink);
+    --plate-bg: var(--color-ink);
+    --on-plate: var(--color-shir);
+    --on-plate-2: var(--color-shir);
+    --on-plate-3: var(--color-shir);
+  }
+
+  /* ---- Pattern grounds --------------------------------------------------
+     A pattern is a decorative layer *behind* a band's content. The SVG that
+     draws it is absolutely positioned and aria-hidden; the content sits
+     above it, on a plate whenever it is text to be read. */
+
+  .pattern-host {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .pattern-layer {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .pattern-layer > svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ---- Tilt -------------------------------------------------------------
+     The static angle of a plate is set with the `rotate` property, NOT with
+     `transform`. That separation is load-bearing twice over:
+
+       1. The reveal below animates `transform`, so the two never fight over
+          one property and a revealed tile settles into its angle instead of
+          out of it.
+       2. `prefers-reduced-motion` clears `transform` to none. The design's
+          static angle is not motion and must survive that; the reveal's
+          offset is motion and must not. One property each is what makes both
+          true at once.
+
+     Every angle is a fixed token from tokens.css. Nothing here is random. */
+
+  .tilt {
+    rotate: var(--tilt, 0deg);
+  }
+
+  /* ---- Chips ------------------------------------------------------------ */
+
+  /* A chip is a small plate, so it takes its plate's text colour — and it has
+     to say so itself. Nothing else would: `.t-body` and `.t-meta` read the
+     `--on-plate*` tokens, but a chip's own label is neither, so without this
+     it inherited ink straight through a lapis plate and measured 1.79:1. */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-chip);
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--on-plate, var(--color-ink));
+  }
+
+  /* ---- Motion -----------------------------------------------------------
+     NABAT's reveal is a stamp, not a slide: the plate comes up from slightly
+     under size and settles. Guarded on [data-js] so that if the script never
+     runs, nothing is hidden — a reveal that fails open is a reveal; one that
+     fails closed is a blank page. */
+
+  [data-js="on"] .reveal {
+    opacity: 0;
+    transform: scale(0.965) translate3d(0, 0.75rem, 0);
+    transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-js="on"] .reveal[data-in="true"] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---- Images ----------------------------------------------------------- */
+
+  .img-frame {
+    position: relative;
+    /* Definite width matters: with `width: auto`, a max-height constraint is
+       transferred back through the aspect ratio and silently narrows the
+       frame instead of cropping it. */
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-shir-deep);
+  }
+
+  .img-fill {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .rule {
+    height: 2px;
+    border: 0;
+    background-color: var(--color-line);
+  }
+}
+
+/* ============================================================================
+   UNLAYERED — must outrank every utility.
+   ========================================================================= */
+
+/* Two-tone focus ring: an ink core inside a cream halo. No single colour
+   clears 3:1 on both cream and lapis, so the ring carries both and at least
+   one of them contrasts on every ground in the palette. Measured ratios are
+   in the token comment. */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--color-focus-halo);
+  border-radius: var(--radius-sm);
+}
+
+.skip-link {
+  position: fixed;
+  inset-block-start: var(--space-3);
+  inset-inline-start: var(--space-3);
+  z-index: 100;
+  transform: translateY(-200%);
+  background-color: var(--color-ink);
+  color: var(--color-shir);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-meta);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Everything arrives already in place. The static plate angles stay, because
+   they are composition rather than motion and they live on `rotate` rather
+   than on `transform` precisely so this rule can tell the two apart. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

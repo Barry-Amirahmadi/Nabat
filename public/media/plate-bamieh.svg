@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img">
+  <defs>
+    <pattern id="pat-plate-bamieh" patternUnits="userSpaceOnUse" width="128" height="128" viewBox="0 0 100 100">
+      <g fill="none" stroke="#231409" color="#231409" stroke-width="5" stroke-linecap="square">
+        <circle cx="25" cy="25" r="9" stroke-width="0" fill="currentColor"/>
+      <circle cx="75" cy="75" r="9" stroke-width="0" fill="currentColor"/>
+      <circle cx="75" cy="25" r="3.5" stroke-width="0" fill="currentColor"/>
+      <circle cx="25" cy="75" r="3.5" stroke-width="0" fill="currentColor"/>
+      </g>
+    </pattern>
+  </defs>
+  <rect width="1024" height="1024" fill="#E88FB0"/>
+  <rect width="1024" height="1024" fill="url(#pat-plate-bamieh)" opacity="0.9"/>
+</svg>

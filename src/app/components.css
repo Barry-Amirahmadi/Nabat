@@ -1,0 +1,482 @@
+/* ============================================================================
+   COMPONENT SURFACES — NABAT
+   Written as CSS classes rather than utility soup so that a colour or a size
+   can only ever change in tokens.css. Tailwind is used for layout — grid
+   spans, flex, order — where it earns its keep.
+   ========================================================================= */
+
+/* ---- Buttons ------------------------------------------------------------
+   A primary button paints itself in the two measured colours of whatever
+   plate it is sitting on: the plate's text colour becomes the fill, and the
+   plate's own background becomes the label. That is one rule for all seven
+   plates, and every resulting pair is already in the tokens table —
+   ink/saffron 8.81:1, ink/rosewater 7.65:1, cream/pomegranate 4.64:1,
+   cream/pistachio 5.29:1, cream/lapis 9.45:1, ink/cream 16.92:1.
+
+   The alternative — one fixed button colour, scoped per ground — is the
+   thing that breaks the first time a button lands on a plate nobody
+   considered. This cannot: the plate supplies both halves. */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 3rem; /* 48px — clears the 44px touch target */
+  padding-inline: var(--space-5);
+  padding-block: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  transition:
+    translate var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out),
+    background-color var(--dur) var(--ease-out);
+}
+
+.btn--primary {
+  background-color: var(--on-plate, var(--color-ink));
+  color: var(--plate-bg, var(--color-shir));
+  box-shadow: var(--shadow-plate);
+}
+
+/* Presses in rather than lighting up — a printed sticker being pushed down.
+   No colour change on hover, so the measured pair is the only pair. */
+@media (hover: hover) {
+  .btn--primary:hover {
+    translate: 0 2px;
+    box-shadow: none;
+  }
+}
+
+.btn--ghost {
+  border-color: var(--on-plate, var(--color-ink));
+  color: var(--on-plate, var(--color-ink));
+}
+
+@media (hover: hover) {
+  .btn--ghost:hover {
+    background-color: color-mix(in srgb, var(--on-plate, var(--color-ink)) 12%, transparent);
+  }
+}
+
+/* ---- Sticker badge -----------------------------------------------------
+   The poster's three badges. A plate, a hard drop, a fixed angle. */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-plate);
+}
+
+/* ---- Header ------------------------------------------------------------
+   Opaque, not a blur. A translucent header over a patterned ground reads as
+   a smear, and the blur is the single most expensive thing a sticky element
+   can do — the editorial family measured a 50ms frame with it against 17ms
+   without, on a page with far less going on behind it than this one. */
+
+.site-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 50;
+  background-color: var(--color-shir);
+  border-block-end: 2px solid var(--color-ink);
+}
+
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-ink);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+/* The current item is a filled plate, not an underline. Saffron carries ink
+   at 8.81:1, so the state is legible rather than decorative. */
+.nav-link[aria-current] {
+  background-color: var(--color-zafaran);
+}
+
+@media (hover: hover) {
+  .nav-link:hover {
+    background-color: color-mix(in srgb, var(--color-zafaran) 45%, transparent);
+  }
+}
+
+/* ---- Mobile navigation panel ------------------------------------------- */
+
+.menu-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-lajvard);
+  --plate-bg: var(--color-lajvard);
+  --on-plate: var(--color-shir);
+  --on-plate-2: var(--color-shir);
+  --on-plate-3: var(--color-shir);
+  color: var(--color-shir);
+  transform: translate3d(calc(var(--flow-start) * 100%), 0, 0);
+  visibility: hidden;
+  transition:
+    transform var(--dur-slow) var(--ease-in-out),
+    visibility 0s linear var(--dur-slow);
+}
+.menu-panel[data-open="true"] {
+  transform: translate3d(0, 0, 0);
+  visibility: visible;
+  transition:
+    transform var(--dur-slow) var(--ease-in-out),
+    visibility 0s;
+}
+
+.menu-panel__link {
+  display: block;
+  padding-block: var(--space-4);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 9vw, 3rem);
+  line-height: 1.25;
+  color: var(--color-shir);
+  border-block-end: 2px solid var(--color-line-reversed);
+}
+
+.menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: var(--radius-sm);
+}
+
+.menu-toggle__bar {
+  display: block;
+  block-size: 2px;
+  background-color: currentColor;
+}
+
+/* ---- Poster ------------------------------------------------------------
+   Band 1, and the one band that reaches into the next one.
+
+   `z-index` on the band itself is what makes the overlap possible at all.
+   Every band is a stacking context — `.pattern-host` sets `isolation:
+   isolate` so a pattern at `z-index: -1` can never escape upwards — and two
+   sibling stacking contexts at `z-index: auto` paint in document order. So
+   the box band below would paint its own plate straight over anything the
+   poster pushed down into it, and a negative margin alone would have looked
+   like it did nothing. */
+
+.poster {
+  position: relative;
+  z-index: 2;
+}
+
+/* The offset photograph. The pull is the band's own bottom padding plus a
+   little, so the picture clears the boundary rather than stopping at it. */
+.poster__photo {
+  position: relative;
+  z-index: 1;
+  margin-block-end: calc(var(--band-y) * -1 - 1.5rem);
+}
+
+/* Below 768 the poster is a single stacked column and a full overlap would
+   drop the picture onto the first tile. It still breaks the boundary, by
+   less. */
+@media (max-width: 47.999rem) {
+  .poster__photo {
+    margin-block-end: calc(var(--band-y) * -1 + 1rem);
+  }
+}
+
+/* ---- Product tile ------------------------------------------------------
+   Nine of these on a three-column grid, each at its own fixed angle, each on
+   its own hue. The tile is a plate, so the copy inside it is on solid colour
+   and never on pattern.
+
+   Three of the nine carry one of the `.tile-lap-*` classes below, which pull
+   them over a neighbour. That is why `z-index` is declared here rather than
+   left to source order: an overlapping tile has to be able to sit above the
+   one it laps, and a hovered or focused tile has to come to the front or its
+   own drop shadow falls behind its neighbour. */
+
+.tile {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lift);
+  transition:
+    translate var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out);
+}
+
+/* The overlap marker sits on the grid cell, not on the tile inside it —
+   placement is the cell's job and appearance is the tile's — so the raise is
+   written as a descendant selector. Set on `.tile[data-overlap]` it matched
+   nothing at all, and the lapping tile would have been painted *under* the
+   neighbour it laps. */
+[data-overlap="true"] .tile,
+.tile:focus-within {
+  z-index: 2;
+}
+
+@media (hover: hover) {
+  .tile:hover {
+    z-index: 3;
+    translate: 0 -4px;
+  }
+}
+
+/* The name is a link inside a heading; the underline is what says so. */
+.tile__link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  border-radius: var(--radius-sm);
+}
+.tile__link-text {
+  border-block-end: 2px solid transparent;
+  transition: border-color var(--dur) var(--ease-out);
+}
+.tile:hover .tile__link-text,
+.tile__link:focus-visible .tile__link-text {
+  border-block-end-color: currentColor;
+}
+
+/* ---- Tile overlaps ----------------------------------------------------
+   The three tiles that break the grid. Each is a negative margin plus the
+   `z-index` the `.tile` rules already raise, so the tile laps over its
+   neighbour rather than being lapped by it.
+
+   `margin-inline-end` — the LEFT edge in an RTL document — is the only
+   horizontal direction used. A negative `margin-inline-start` would push a
+   tile past the container's start edge and straight out of the viewport,
+   which is the one overflow the §13 pass cannot forgive because it produces a
+   horizontal scrollbar on a phone.
+
+   lg only: below 1024px the grid is one or two columns and a tile wider than
+   its column has nowhere to go. */
+
+@media (min-width: 64rem) {
+  .tile-lap-a {
+    margin-inline-end: -2rem;
+  }
+
+  .tile-lap-b {
+    margin-block-start: -3rem;
+  }
+
+  .tile-lap-c {
+    margin-inline-end: -2rem;
+    margin-block-start: -1.5rem;
+  }
+}
+
+/* ---- Group block — home band 4, and the collection's group headers ----- */
+
+.group-block {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lift);
+}
+
+/* ---- Group index — the collection page's contents line ----------------
+   The groups at the start edge, the total at the end. Wraps to two lines on a
+   phone rather than scrolling sideways. */
+
+.group-index {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+  padding: var(--space-3) var(--space-5);
+  box-shadow: var(--shadow-plate);
+}
+
+.group-index__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-5);
+}
+
+.group-index__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 2.75rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  transition: text-decoration-color var(--dur-fast) var(--ease-out);
+}
+.group-index__link:hover {
+  text-decoration-color: currentColor;
+}
+
+/* ---- Pull-quote plate — the about page's interruptions ------------------ */
+
+.pull-quote {
+  padding: var(--space-6);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-plate);
+}
+
+/* ---- Order band -------------------------------------------------------- */
+
+.order-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+}
+
+/* A row of contact details that must not break mid-number.
+
+   `color` is declared here for the same reason it is on `.chip`: this is the
+   one line in each block that is neither body nor metadata, so it inherited
+   ink from the page through plates it had no business inheriting through —
+   ink on pomegranate measures 3.64:1 and ink on pistachio 3.20:1, against a
+   7:1 floor. Reading the plate's own token is what makes the four blocks
+   legible on four different colours. */
+.order-block__value {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.6vw, 1.75rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  color: var(--on-plate, var(--color-ink));
+}
+
+/* ---- Gallery -----------------------------------------------------------
+   `cursor: pointer`, explicitly.
+
+   PARNIAN's gallery tiles compute `cursor: default`: the reset in globals.css
+   sets `cursor: pointer` on `button`, and a `<figure> > button` there was
+   overridden by a later rule that only ever set `cursor: zoom-in` on a
+   different element. It is a known open defect on that site and the brief
+   forbids reproducing it, so the property is declared on the tile itself and
+   the §13 pass measures the computed value rather than trusting the reset. */
+
+/* The card is the plate: padding, shadow and the lift live here, because the
+   caption has to sit on the plate too. Pattern never runs behind read text,
+   and a caption outside the plate would have the band's geometry through it. */
+
+.gallery-card {
+  box-shadow: var(--shadow-lift);
+  padding: var(--space-3);
+  transition:
+    translate var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .gallery-card:hover {
+    translate: 0 -4px;
+  }
+}
+
+/* The button is the picture. It carries `cursor: pointer` itself — see the
+   note above; this is the one property the family's other site gets wrong. */
+
+.gallery-tile {
+  display: block;
+  inline-size: 100%;
+  text-align: start;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.gallery-tile__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block-start: var(--space-3);
+}
+
+/* ---- Lightbox ---------------------------------------------------------- */
+
+.lightbox {
+  border: 0;
+  padding: 0;
+  max-inline-size: 100vw;
+  max-block-size: 100vh;
+  inline-size: 100vw;
+  block-size: 100dvh;
+  background-color: transparent;
+  color: var(--color-shir);
+  overflow: hidden;
+  --plate-bg: var(--color-ink);
+  --on-plate: var(--color-shir);
+  --on-plate-2: var(--color-shir);
+  --on-plate-3: var(--color-shir);
+}
+.lightbox::backdrop {
+  /* Opaque. A translucent backdrop over a patterned, six-hue page turns the
+     enlarged photograph into a collision of everything behind it. */
+  background-color: #231409;
+}
+
+/* ---- Dense text links -------------------------------------------------
+   Small metadata type still needs a finger-sized hit area, and the height
+   has to come from the link rather than from padding on the row, or the list
+   grows taller than the design intends. */
+
+.dense-link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  border-radius: var(--radius-sm);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25em;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  transition: text-decoration-color var(--dur-fast) var(--ease-out);
+}
+.dense-link:hover {
+  text-decoration-color: currentColor;
+}
+
+/* ---- Breadcrumb -------------------------------------------------------- */
+
+.crumb {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Chips — the four `details` rows on a product page ----------------- */
+
+/* Outlined, but not transparent. The border is the design; the opaque fill is
+   the rule — these sit on a patterned band, and metadata read against the gold
+   strokes rather than against the band measured 5.66:1 where 7:1 is required.
+   The fill is the band's own colour, so it is invisible as a panel and visible
+   only as the absence of pattern. */
+.chip--outline {
+  border: 2px solid var(--on-plate, var(--color-ink));
+  color: var(--on-plate, var(--color-ink));
+  background-color: var(--plate-bg, var(--color-shir));
+}

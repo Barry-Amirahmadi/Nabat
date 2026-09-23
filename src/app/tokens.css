@@ -1,0 +1,226 @@
+/* ============================================================================
+   NABAT — DESIGN TOKENS
+   Single source of truth. Nothing in the app may hardcode a colour, a size,
+   a duration or an easing curve; it references a token from this file.
+
+   Palette rationale — six hues, all committed, named from the subject's own
+   world. Maximalism here means a wide palette used confidently, not a
+   restrained one with a single accent:
+
+     شیر   / shir      warm cream, the page ground — boiled milk and sugar
+     زعفران / zafaran   saffron, the colour the whole trade is built on
+     انار  / anar      pomegranate
+     پسته  / pesteh    pistachio
+     گلاب  / golab     rosewater
+     لاجورد / lajvard   lapis — the blue of a tiled dome
+     طلا   / tala      gold, pattern strokes only, never text
+
+   EVERY RATIO BELOW IS MEASURED, not assumed. The starting values the brief
+   supplied were unverified and one of them did not hold: pistachio began at
+   #3F8F4F, where cream reversed out of it measures 3.79:1 — under the 4.5:1
+   this project requires of reversed text. It was darkened to #33753F, which
+   measures 5.29:1, and the hue was kept rather than demoted.
+
+   Which plate may carry which text is a property of the measurement, not a
+   preference:
+
+     ink on a plate, 7:1      shir, shir-deep, zafaran, golab → body allowed
+     cream reversed, 4.5:1    anar, pesteh, lajvard     → body text allowed
+     display only, 3:1        ink on anar 3.64, ink on pesteh 3.20
+     never text               tala
+
+   A plate that cannot hold its ratio does not get body text put on it. The
+   hue goes behind display type or behind pattern instead.
+   ========================================================================= */
+
+@theme {
+  /* ---- Colour: ground -------------------------------------------------- */
+  --color-shir: #fff8ec; /* page ground — ink 16.92:1 */
+  --color-shir-deep: #f6ead4; /* secondary ground, image mats */
+
+  /* ---- Colour: ink ----------------------------------------------------- */
+  /* The two secondary steps are for the CREAM GROUNDS ONLY, and that is a
+     measured restriction rather than a stylistic one: ink-2 measures 11.03:1
+     on shir and 9.78:1 on shir-deep, but only 5.74:1 on saffron and 4.98:1
+     on rosewater. A coloured plate therefore gets full ink on every line it
+     carries, never a dimmed step — hierarchy on a plate comes from size and
+     from the two display faces, not from opacity. The reversed side follows
+     the same rule for the same reason: cream on pomegranate is 4.64:1 at
+     full strength, so there is no room above the floor to dim anything.
+
+     BOTH cream grounds are measured, and that is what set these values. The
+     first draft of this file had ink-3 at #644B2C — 7.70:1 on shir, which
+     clears the 7:1 minimum, and 6.82:1 on shir-deep, which does not. Bands
+     alternate between the two grounds, so every second band on the site would
+     have carried metadata under the floor, on a page where nothing looks
+     wrong. The three steps were then re-spaced rather than nudged: darkening
+     ink-3 alone brought it to within 0.4 of ink-2 and collapsed the
+     hierarchy the steps exist for.
+
+                       on shir    on shir-deep
+       ink               16.92        15.01
+       ink-2             11.03         9.78
+       ink-3              8.38         7.43 */
+  --color-ink: #231409; /* 16.92:1 on shir · 15.01:1 on shir-deep */
+  --color-ink-2: #48351e; /* body — 11.03:1 / 9.78:1 · cream grounds only */
+  --color-ink-3: #5d4629; /* metadata — 8.38:1 / 7.43:1 · cream grounds only */
+
+  /* ---- Colour: the six hues -------------------------------------------- */
+  /* Plates that take INK text. */
+  --color-zafaran: #f5a623; /* ink 8.81:1 */
+  --color-golab: #e88fb0; /* ink 7.65:1 */
+
+  /* Plates that take CREAM text reversed out. */
+  --color-anar: #d6265a; /* cream 4.64:1 · ink display 3.64:1 */
+  --color-pesteh: #33753f; /* cream 5.29:1 · ink display 3.20:1 */
+  --color-lajvard: #2b3a8f; /* cream 9.45:1 */
+
+  /* Pattern strokes only. Never text, at any size — this is the one token in
+     the file with a rule attached rather than a ratio. */
+  --color-tala: #c9a227;
+
+  /* The one stroke colour that may sit behind type.
+     Gold behind reversed cream measures 2.29:1, so the PATTERN BREAK band —
+     the only place on the site where type is knocked straight out of a
+     pattern rather than off a plate — cannot use it. This lighter lapis
+     reverses cream at 5.24:1 while still reading as pattern against the lapis
+     ground it is drawn on at 1.80:1. */
+  --color-lapis-light: #5163b4;
+
+  /* ---- Colour: lines --------------------------------------------------- */
+  --color-line: color-mix(in srgb, #231409 22%, transparent);
+  --color-line-strong: color-mix(in srgb, #231409 48%, transparent);
+  --color-line-reversed: color-mix(in srgb, #fff8ec 40%, transparent);
+
+  /* ---- Colour: focus --------------------------------------------------- */
+  /* Two-tone, and that is the whole mechanism. No single colour clears 3:1
+     against both cream and lapis — ink measures 16.92:1 on cream and 1.79:1
+     on lapis — so the ring is an ink core inside a cream halo, and on every
+     ground in the palette at least one of the two carries the contrast:
+
+       shir 16.92 (ink)   zafaran 8.81 (ink)   golab 7.65 (ink)
+       anar  4.64 (halo)  pesteh  5.29 (halo)  lajvard 9.45 (halo)
+
+     The two also separate from each other at 16.92:1, so the ring reads as a
+     ring rather than as a smudge. Scoping one ring colour per ground was the
+     alternative and it fails the moment a control sits on a plate nobody
+     thought about. */
+  --color-focus: #231409;
+  --color-focus-halo: #fff8ec;
+
+  /* ---- Type families ---------------------------------------------------
+     Lalezar   — Persian display, one weight. Brand name, band headings,
+                 product names.
+     Rakkas    — second display voice. Badges, pull-quotes, group headers.
+                 Set *against* Lalezar, never in the same line.
+     Vazirmatn — body, 400 and 500.
+
+     Three faces is itself the statement: the density of this design is
+     partly typographic, and two display faces arguing with each other is
+     what a confectionery poster actually looks like.
+
+     Wired to next/font in layout.tsx; the vars are declared there.         */
+  --font-display: var(--font-lalezar), "Lalezar", cursive;
+  --font-display-alt: var(--font-rakkas), "Rakkas", cursive;
+  --font-body: var(--font-vazir), "Vazirmatn", system-ui, sans-serif;
+
+  /* ---- Type scale — loud, but not VARAGH's 13vw ------------------------ */
+  --text-brand: clamp(3rem, 9vw, 7rem); /* the poster wordmark, once a page */
+  --text-band: clamp(2rem, 5.5vw, 3.75rem); /* band headings */
+  --text-name: clamp(1.5rem, 3.5vw, 2.5rem); /* product names */
+  --text-quote: clamp(1.375rem, 3vw, 2.125rem); /* pull-quote plates */
+  --text-badge: clamp(0.9375rem, 1.8vw, 1.1875rem); /* sticker badges */
+  --text-lead: clamp(1.0625rem, 1.5vw, 1.25rem);
+  --text-body: 1.0625rem; /* 17px — Persian reads small at 16 */
+  --text-sm: 0.9375rem;
+  --text-meta: 0.8125rem;
+  --text-chip: 0.8125rem;
+
+  /* ---- Line height ---------------------------------------------------- */
+  /* Lalezar and Rakkas are both compact display faces with short descenders,
+     so display leading is tight; Persian body text still needs air. */
+  --leading-display: 1.1;
+  --leading-heading: 1.25;
+  --leading-body: 1.9;
+  --leading-tight: 1.5;
+
+  /* ---- Spacing scale --------------------------------------------------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-10: 8rem;
+
+  /* ---- Layout rhythm --------------------------------------------------- */
+  --band-y: clamp(4rem, 8vw, 8rem);
+  --band-y-tight: clamp(2.5rem, 5vw, 5rem);
+  --gutter: clamp(1.125rem, 4vw, 3.5rem);
+  --grid-gap: clamp(0.75rem, 1.6vw, 1.5rem);
+  --container-max: 1440px;
+  --measure: 34rem;
+  --measure-tight: 26rem;
+
+  /* ---- Radius — small. Chips and plates only. Not TARAZ's 20px. -------- */
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-full: 999px;
+
+  /* ---- Rotation constants ---------------------------------------------
+     FIXED, never random. A random layout cannot be reviewed, cannot be
+     reproduced between two builds, and cannot be regression-tested — the
+     verification pass in §13 measures the bounding box of every rotated
+     element, which is only meaningful if the angle is the same twice.
+
+     Nine tiles, nine constants, spanning −3° to +3°. */
+  --tilt-1: -2.5deg;
+  --tilt-2: 1.5deg;
+  --tilt-3: -1deg;
+  --tilt-4: 2deg;
+  --tilt-5: -3deg;
+  --tilt-6: 0.5deg;
+  --tilt-7: 1.75deg;
+  --tilt-8: -2deg;
+  --tilt-9: 3deg;
+
+  /* Badges and plates carry their own, larger angles. */
+  --tilt-badge-1: -4deg;
+  --tilt-badge-2: 3deg;
+  --tilt-badge-3: -2deg;
+
+  /* ---- Elevation — a printed sticker's drop, not a UI card's glow ------ */
+  --shadow-plate: 0 2px 0 color-mix(in srgb, #231409 18%, transparent);
+  --shadow-lift: 0 6px 0 color-mix(in srgb, #231409 14%, transparent);
+
+  /* ---- Motion ---------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 180ms;
+  --dur: 360ms;
+  --dur-slow: 640ms;
+
+  /* ---- Breakpoints ----------------------------------------------------- */
+  --breakpoint-sm: 24rem; /* 384 — covers 375/390 phones */
+  --breakpoint-md: 48rem; /* 768 */
+  --breakpoint-lg: 64rem; /* 1024 */
+  --breakpoint-xl: 80rem; /* 1280 */
+  --breakpoint-2xl: 90rem; /* 1440 */
+}
+
+/* ============================================================================
+   DIRECTION AXIS
+   The document is RTL. Physical transforms (translateX) do not flip with
+   `dir`, so motion and offset direction are driven by this multiplier
+   instead. Adding an English locale later means overriding one declaration.
+   ========================================================================= */
+:root {
+  --flow-start: 1; /* content enters from the right in RTL */
+}
+[dir="ltr"] {
+  --flow-start: -1;
+}

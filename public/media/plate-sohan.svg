@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img">
+  <defs>
+    <pattern id="pat-plate-sohan" patternUnits="userSpaceOnUse" width="128" height="171" viewBox="0 0 100 133">
+      <g fill="none" stroke="#C9A227" color="#C9A227" stroke-width="5" stroke-linecap="square">
+        <path d="M10 100V52C10 26 27 8 50 2 73 8 90 26 90 52v48"/>
+      <path d="M28 100V56C28 38 37 26 50 21 63 26 72 38 72 56v44"/>
+      <path d="M0 100h100"/>
+      </g>
+    </pattern>
+  </defs>
+  <rect width="1024" height="1024" fill="#2B3A8F"/>
+  <rect width="1024" height="1024" fill="url(#pat-plate-sohan)" opacity="0.9"/>
+</svg>
