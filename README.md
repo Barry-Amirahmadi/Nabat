@@ -4,7 +4,7 @@ A Persian confectionery demo — nine sweets, three groups, one box. RTL-first,
 static-exported, and deliberately loud: every band on the page sits on a
 geometric ground drawn in SVG, not on a photograph.
 
-**Live:** https://barry-amirahmadi.github.io/nabat/
+**Live:** https://barry-amirahmadi.github.io/Nabat/
 
 ## Why it looks like this
 
