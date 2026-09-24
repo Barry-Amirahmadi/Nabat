@@ -1,5 +1,5 @@
 import type { Product } from "@/types/content";
-import { photo, plate } from "./media";
+import { photo } from "./media";
 import { resolveProducts } from "./resolveProducts";
 
 /**
@@ -27,12 +27,21 @@ import { resolveProducts } from "./resolveProducts";
  * `tone` is the item's group key — see `src/content/groups.ts` for what it
  * selects and why it replaced a per-item colour.
  *
- * **Three of the nine carry no photograph**: باقلوا, بامیه and سوهان, one from
- * each group so no group looks under-served. Their tile is pattern and type
- * only, and their `image` is a decorative pattern plate with an empty `alt`
- * rather than a picture. Every image is 1:1 — the whole set is shot to one
- * square standard, which is what a confectionery catalogue actually looks
- * like and what makes nine unrelated sweets read as one box.
+ * **All nine carry a photograph.** Three of them — باقلوا, بامیه and سوهان,
+ * one from each group — shipped without one and stood on a pattern plate with
+ * an empty `alt` instead, which the components and `productSchema()` read as
+ * "this is not a picture of the item". That was a deliberate demonstration
+ * that the template degrades honestly when a client has no photograph of
+ * everything, and it was retired on 2026-09-24 because a catalogue with three
+ * gaps reads as unfinished to the person being shown it, whatever the
+ * intention. The path itself is still live: `plate()` in `./media` and the
+ * empty-alt handling behind it are unchanged, so an item added tomorrow
+ * without a photograph still renders correctly. Nothing in this array uses it
+ * today.
+ *
+ * Every image is 1:1 — the whole set is shot to one square standard, which is
+ * what a confectionery catalogue actually looks like and what makes nine
+ * unrelated sweets read as one box.
  */
 export const products: Product[] = [
   /* ---- خشک و مغزدار ----------------------------------------------------- */
@@ -102,8 +111,7 @@ export const products: Product[] = [
       { label: "همراه", value: "چای پررنگ" },
     ],
     tone: "khoshk",
-    /* No photograph. The tile is pattern and type only — see the note above. */
-    image: plate("plate-baghlava"),
+    image: photo("p-07", "باقلوا نبات، لوزی‌های کوچک لایه‌لایه با پستهٔ ساییدهٔ سبز روی سطحی کرم‌رنگ"),
     status: "published",
   },
 
@@ -175,8 +183,7 @@ export const products: Product[] = [
       { label: "همراه", value: "چای داغ" },
     ],
     tone: "tar",
-    /* No photograph. */
-    image: plate("plate-bamieh"),
+    image: photo("p-08", "بامیهٔ نبات، قطعه‌های کوتاه و شیاردار با لعاب شربت طلایی روی سطحی کرم‌رنگ"),
     status: "published",
   },
 
@@ -248,8 +255,7 @@ export const products: Product[] = [
       { label: "همراه", value: "چای پررنگ" },
     ],
     tone: "ghand",
-    /* No photograph. */
-    image: plate("plate-sohan"),
+    image: photo("p-09", "سوهان نبات، برش‌های گرد و نازک کاراملی با خلال پسته و بادام روی سطحی کرم‌رنگ"),
     status: "published",
   },
 ];

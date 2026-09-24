@@ -250,23 +250,73 @@ test("an item route survives a hard load under the base path", async ({ page }) 
  * which is what a fallback would do, and the structured data must not claim a
  * photograph of the sweet exists.
  */
-test("an item with no photograph renders geometry, and claims none", async ({ page }) => {
-  await page.goto(`${BASE}/products/baghlava/`);
+/**
+ * This replaced "an item with no photograph renders geometry, and claims none"
+ * on 2026-09-24, when باقلوا, بامیه and سوهان got photographs and no item was
+ * left without one. The old test asserted an absence; asserting it against a
+ * page that now has a picture would have passed for the wrong reason forever.
+ *
+ * What replaces it is stronger, because it runs over all nine items rather
+ * than one: every item shows a photograph, describes it for somebody who
+ * cannot see it, and asserts in its structured data exactly the file it is
+ * actually showing — not a different one, and not one that does not exist.
+ *
+ * The empty-alt contract is still enforced here. `plate()` and the handling
+ * behind it are unchanged, so an item added without a photograph still
+ * renders; the day one is added, this test is what fails and says so.
+ */
+test("every item shows a photograph, describes it, and claims exactly it", async ({ page }) => {
+  const items: Array<[slug: string, name: string, file: string]> = [
+    ["ghottab", "قطاب", "p-01.jpg"],
+    ["nan-berenji", "نان برنجی", "p-02.jpg"],
+    ["nan-khamei", "نان خامه‌ای", "p-03.jpg"],
+    ["rolet-golab", "رولت گلاب", "p-04.jpg"],
+    ["nabat-zafarani", "نبات زعفرانی", "p-05.jpg"],
+    ["poolaki", "پولکی", "p-06.jpg"],
+    ["baghlava", "باقلوا", "p-07.jpg"],
+    ["bamieh", "بامیه", "p-08.jpg"],
+    ["sohan", "سوهان", "p-09.jpg"],
+  ];
 
-  await expect(page.locator("h1")).toHaveText("باقلوا");
-  await expect(page.locator("[data-pattern-layer]").first()).toBeAttached();
+  for (const [slug, name, file] of items) {
+    await page.goto(`${BASE}/products/${slug}/`);
+    await expect(page.locator("h1")).toHaveText(name);
 
-  const emptyAlt = await page.locator('main img[alt=""]').count();
-  expect(emptyAlt, "an image with no alt text").toBe(0);
+    const hero = page.locator(`main img[src$="${file}"]`).first();
+    await expect(hero, `${slug} shows ${file}`).toBeAttached();
 
-  const product = await page
-    .locator('script[type="application/ld+json"]')
-    .evaluateAll((els) =>
-      els
-        .map((el) => JSON.parse(el.textContent ?? "{}") as Record<string, unknown>)
-        .find((p) => p["@type"] === "Product"),
-    );
-  expect(product?.image, "Product must not assert an image it does not have").toBeUndefined();
+    // Decoding, not just present in the DOM: a 404 would still be attached.
+    const loaded = await hero.evaluate((el) => {
+      const img = el as HTMLImageElement;
+      return img.complete && img.naturalWidth > 0;
+    });
+    expect(loaded, `${slug}: ${file} decoded`).toBe(true);
+
+    const alt = (await hero.getAttribute("alt")) ?? "";
+    expect(alt.length, `${slug} alt is written`).toBeGreaterThan(10);
+    expect(alt, `${slug} alt is not the filename`).not.toContain(file);
+    expect(alt, `${slug} alt names the sweet`).toContain(name);
+
+    const emptyAlt = await page.locator('main img[alt=""]').count();
+    expect(emptyAlt, `${slug}: an image with no alt text`).toBe(0);
+
+    const product = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((els) =>
+        els
+          .map((el) => JSON.parse(el.textContent ?? "{}") as Record<string, unknown>)
+          .find((p) => p["@type"] === "Product"),
+      );
+    const claimed = Array.isArray(product?.image) ? product.image : [product?.image];
+    expect(
+      claimed.every((u) => typeof u === "string" && u.length > 0),
+      `${slug}: Product asserts an image`,
+    ).toBe(true);
+    expect(
+      claimed.some((u) => String(u).endsWith(file)),
+      `${slug}: Product asserts ${file}, the file the page shows`,
+    ).toBe(true);
+  }
 });
 
 test("the collection page groups the box and its index resolves", async ({ page }) => {
