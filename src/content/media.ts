@@ -19,7 +19,15 @@ import type { MediaAsset, Ratio } from "@/types/content";
  * placeholder and a raster photograph, so it is spelled once here rather than
  * nine times across the products file.
  */
-const PHOTO_EXT: "svg" | "jpg" = "svg";
+/** The two states this file switches between. */
+type PhotoExt = "svg" | "jpg";
+
+// Asserted rather than annotated. With a plain annotation TypeScript narrows a
+// `const` to its initialiser, which makes the `=== "svg"` below an impossible
+// comparison and fails `typecheck` — so the switch only compiled in one of its
+// two positions, which is the one thing a switch must not do. `as PhotoExt`
+// keeps the declared type wide so both positions build.
+const PHOTO_EXT = "jpg" as PhotoExt;
 
 /** True while the slots are still generated vector placeholders. Read by the
  *  image component, which must not hand an SVG to a raster optimiser. */

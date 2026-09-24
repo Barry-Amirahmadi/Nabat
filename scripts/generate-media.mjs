@@ -12,6 +12,12 @@
  * ratio at 1024×1024. Only the extension changes, and it is spelled once, in
  * `src/content/media.ts`.
  *
+ * **All eight slots were filled with real photographs on 2026-09-24**, so this
+ * half of the script now writes nothing: a slot is skipped when a `.jpg` for
+ * it already exists. The generator is kept rather than deleted because it is
+ * the only record of what the set was composed to look like, and because a
+ * ninth item added later needs a stand-in until its photograph exists.
+ *
  * **Three pattern plates** — `plate-baghlava`, `plate-bamieh`, `plate-sohan`.
  * These are permanent. Three of the nine items carry no photograph at all, by
  * design: their tile is geometry and type. On the page that geometry is drawn
@@ -28,7 +34,7 @@
  *
  *   node scripts/generate-media.mjs
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -200,7 +206,16 @@ const plate = ({ name, kind, ground, stroke, cell }) => {
 /* -------------------------------------------------------------------------- */
 
 let count = 0;
+let skipped = 0;
 for (const slot of slots) {
+  // A real photograph has landed in this slot, so the placeholder is done. It
+  // is not rewritten: a `${slot}.svg` sitting next to a `${slot}.jpg` is a file
+  // nothing references and it contradicts what the page actually serves. This
+  // is what makes the script safe to re-run after Phase C.
+  if (existsSync(join(outDir, `${slot.name}.jpg`))) {
+    skipped += 1;
+    continue;
+  }
   writeFileSync(join(outDir, `${slot.name}.svg`), study(slot), "utf8");
   count += 1;
 }
@@ -209,5 +224,8 @@ for (const p of plates) {
   count += 1;
 }
 console.log(
-  `generated ${count} files → public/media/  (${slots.length} photographic placeholders, ${plates.length} pattern plates)`,
+  `generated ${count} files → public/media/  (${slots.length - skipped} of ${slots.length} photographic placeholders, ${plates.length} pattern plates)`,
 );
+if (skipped > 0) {
+  console.log(`skipped ${skipped} slot${skipped === 1 ? "" : "s"} — a photograph is already in place`);
+}
